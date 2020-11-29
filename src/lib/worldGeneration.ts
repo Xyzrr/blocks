@@ -1,6 +1,11 @@
 import {Block, createBlock} from './blocks';
 import {Biome, BIOME_TYPES, createBiome} from './biomes';
-import {BIOME_SIZE, MAX_BIOME_GENERATION_DEPTH, MIN_Z} from './consts';
+import {
+  BIOME_SIZE,
+  HEIGHT_VARIATION,
+  MAX_BIOME_GENERATION_DEPTH,
+  MIN_Z,
+} from './consts';
 
 interface Coord2D {
   x: number;
@@ -56,11 +61,18 @@ function fillWorldChunk(startX: number, startY: number): void {
   const biome = getBiome({x: startX, y: startY});
   for (let x = startX; x < startX + BIOME_SIZE; x++) {
     for (let y = startY; y < startY + BIOME_SIZE; y++) {
-      for (let z = MIN_Z; z <= 0; z++) {
+      const height = getHeight({x, y});
+      for (let z = MIN_Z; z <= height; z++) {
         world[coordToStr({x, y, z})] = createBlock(biome.type);
       }
     }
   }
+}
+
+function getHeight({x, y}: Coord2D): number {
+  const d = Math.sqrt(x * x + y * y);
+  const mult = Math.sin(d);
+  return Math.round(mult * HEIGHT_VARIATION);
 }
 
 export function getBlock(c: Coord): Block | null {
