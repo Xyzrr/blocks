@@ -2,10 +2,13 @@ import {Block, createBlock} from './blocks';
 import {Biome, BIOME_TYPES, createBiome} from './biomes';
 import {
   BIOME_SIZE,
+  CAVE_RADIUS,
   HEIGHT_VARIATION,
   MAX_BIOME_GENERATION_DEPTH,
   MIN_Z,
+  NUM_CAVES,
 } from './consts';
+import {randBetween, randFromArray} from './util';
 
 interface Coord2D {
   x: number;
@@ -68,6 +71,22 @@ function fillWorldChunk(startX: number, startY: number): void {
     }
   }
 }
+
+function generateCaves(): void {
+  const allCoords = Object.keys(world).map(strToCoord);
+  for (let i = 0; i < NUM_CAVES; i++) {
+    const coord = randFromArray(allCoords);
+    const zStart = randBetween(MIN_Z, 0);
+    for (let x = coord.x - CAVE_RADIUS; x <= coord.x + CAVE_RADIUS; x++) {
+      for (let y = coord.y - CAVE_RADIUS; x <= coord.y + CAVE_RADIUS; y++) {
+        for (let z = zStart; z < zStart + CAVE_RADIUS; z++) {
+          delete world[coordToStr({x, y, z})];
+        }
+      }
+    }
+  }
+}
+generateCaves();
 
 function getHeight({x, y}: Coord2D): number {
   const d = Math.sqrt(x * x + y * y);
